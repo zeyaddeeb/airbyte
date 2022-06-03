@@ -14,7 +14,7 @@ import io.airbyte.db.ExceptionWrappingDatabase;
 import io.airbyte.db.factory.DatabaseCheckFactory;
 import io.airbyte.db.init.DatabaseInitializationException;
 import io.airbyte.db.instance.DatabaseConstants;
-import io.airbyte.db.instance.DatabaseMigrator;
+import io.airbyte.db.instance.FlywayDatabaseMigrator;
 import io.airbyte.db.instance.test.TestDatabaseProvider;
 import java.io.IOException;
 import java.time.OffsetDateTime;
@@ -39,13 +39,15 @@ public class ConfigsDatabaseTestProvider implements TestDatabaseProvider {
     DatabaseCheckFactory.createConfigsDatabaseInitializer(dslContext, DatabaseConstants.DEFAULT_CONNECTION_TIMEOUT_MS, initalSchema).initialize();
 
     final Database database = new Database(dslContext);
+    final FlywayDatabaseMigrator migrator = new ConfigsDatabaseMigrator(
+        database, flyway);
 
     if (runMigration) {
-      final DatabaseMigrator migrator = new ConfigsDatabaseMigrator(
-          database, flyway);
-      migrator.createBaseline();
       migrator.migrate();
     } else {
+      // Applying the baseline migration otherwise the insert below to ensure the DB is ready will fail
+      migrator.migrate("0_29_1_001");
+
       // The configs database is considered ready only if there are some seed records.
       // So we need to create at least one record here.
       final OffsetDateTime timestamp = OffsetDateTime.now();

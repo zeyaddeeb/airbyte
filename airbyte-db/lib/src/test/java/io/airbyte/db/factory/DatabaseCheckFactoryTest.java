@@ -15,11 +15,15 @@ import io.airbyte.db.init.impl.JobsDatabaseInitializer;
 import org.flywaydb.core.Flyway;
 import org.jooq.DSLContext;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
  * Test suite for the {@link DatabaseCheckFactory} class.
  */
+// This becomes irrelevant once we have the baselines for Jobs and Configs
+// TODO: Remove the tests and the classes
+@Disabled
 class DatabaseCheckFactoryTest {
 
   @Test

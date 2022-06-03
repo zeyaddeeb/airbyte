@@ -21,10 +21,8 @@ import io.airbyte.config.persistence.split_secrets.SecretPersistence;
 import io.airbyte.db.Database;
 import io.airbyte.db.factory.DSLContextFactory;
 import io.airbyte.db.factory.DataSourceFactory;
-import io.airbyte.db.factory.DatabaseCheckFactory;
 import io.airbyte.db.factory.DatabaseDriver;
 import io.airbyte.db.factory.FlywayFactory;
-import io.airbyte.db.instance.DatabaseConstants;
 import io.airbyte.db.instance.DatabaseMigrator;
 import io.airbyte.db.instance.configs.ConfigsDatabaseMigrator;
 import io.airbyte.db.instance.jobs.JobsDatabaseMigrator;
@@ -139,11 +137,13 @@ public class BootloaderApp {
 
   public void load() throws Exception {
     LOGGER.info("Initializing databases...");
-    DatabaseCheckFactory.createConfigsDatabaseInitializer(configsDslContext,
-        configs.getConfigsDatabaseInitializationTimeoutMs(), MoreResources.readResource(DatabaseConstants.CONFIGS_SCHEMA_PATH)).initialize();
+    // DatabaseCheckFactory.createConfigsDatabaseInitializer(configsDslContext,
+    // configs.getConfigsDatabaseInitializationTimeoutMs(),
+    // MoreResources.readResource(DatabaseConstants.CONFIGS_SCHEMA_PATH)).initialize();
 
-    DatabaseCheckFactory.createJobsDatabaseInitializer(jobsDslContext,
-        configs.getJobsDatabaseInitializationTimeoutMs(), MoreResources.readResource(DatabaseConstants.JOBS_SCHEMA_PATH)).initialize();
+    // DatabaseCheckFactory.createJobsDatabaseInitializer(jobsDslContext,
+    // configs.getJobsDatabaseInitializationTimeoutMs(),
+    // MoreResources.readResource(DatabaseConstants.JOBS_SCHEMA_PATH)).initialize();
     LOGGER.info("Databases initialized.");
 
     LOGGER.info("Setting up config database and default workspace...");

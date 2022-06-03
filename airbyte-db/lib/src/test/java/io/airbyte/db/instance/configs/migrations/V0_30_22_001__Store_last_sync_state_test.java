@@ -32,9 +32,13 @@ import io.airbyte.config.StandardSyncState;
 import io.airbyte.config.State;
 import io.airbyte.db.Database;
 import io.airbyte.db.factory.DatabaseCheckFactory;
+import io.airbyte.db.factory.FlywayFactory;
 import io.airbyte.db.init.DatabaseInitializationException;
 import io.airbyte.db.instance.DatabaseConstants;
-import io.airbyte.db.instance.configs.AbstractConfigsDatabaseTest;
+import io.airbyte.db.instance.configs.ConfigsDatabaseMigrator;
+import io.airbyte.db.instance.configs.ConfigsDatabaseTestProvider;
+import io.airbyte.db.instance.jobs.AbstractJobsDatabaseTest;
+import io.airbyte.db.instance.jobs.JobsDatabaseMigrator;
 import io.airbyte.db.instance.jobs.JobsDatabaseTestProvider;
 import java.io.IOException;
 import java.sql.Connection;
@@ -45,6 +49,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
+import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.configuration.Configuration;
 import org.flywaydb.core.api.migration.Context;
 import org.jooq.DSLContext;
@@ -60,7 +65,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.Timeout;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class V0_30_22_001__Store_last_sync_state_test extends AbstractConfigsDatabaseTest {
+class V0_30_22_001__Store_last_sync_state_test extends AbstractJobsDatabaseTest {
 
   private static final ObjectMapper OBJECT_MAPPER = MoreMappers.initMapper();
   private static final OffsetDateTime TIMESTAMP = OffsetDateTime.now();
@@ -95,7 +100,13 @@ class V0_30_22_001__Store_last_sync_state_test extends AbstractConfigsDatabaseTe
   @Timeout(value = 2,
            unit = TimeUnit.MINUTES)
   public void setupJobDatabase() throws DatabaseInitializationException, IOException {
-    jobDatabase = new JobsDatabaseTestProvider(dslContext, null).create(false);
+    Flyway jobsFlyway = FlywayFactory.create(dataSource, getClass().getName(), JobsDatabaseMigrator.DB_IDENTIFIER,
+        JobsDatabaseMigrator.MIGRATION_FILE_LOCATION);
+    jobDatabase = new JobsDatabaseTestProvider(dslContext, jobsFlyway).create(false);
+
+    Flyway configsFlyway = FlywayFactory.create(dataSource, getClass().getName(), ConfigsDatabaseMigrator.DB_IDENTIFIER,
+        ConfigsDatabaseMigrator.MIGRATION_FILE_LOCATION);
+    new ConfigsDatabaseTestProvider(dslContext, configsFlyway).create(false);
   }
 
   @Test

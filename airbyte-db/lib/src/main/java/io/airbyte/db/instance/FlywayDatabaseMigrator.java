@@ -38,6 +38,16 @@ public class FlywayDatabaseMigrator implements DatabaseMigrator {
     return result;
   }
 
+  // Migrate to a specific version
+  // Most likely, this should only be used for testing. Prod should target the most recent version or
+  // have rollbacks if needed.
+  // TODO: do we want to bubble it up in the interface?
+  public MigrateResult migrate(String target) {
+    final MigrateResult result = Flyway.configure().configuration(flyway.getConfiguration()).target(target).load().migrate();
+    result.warnings.forEach(LOGGER::warn);
+    return result;
+  }
+
   @Override
   public List<MigrationInfo> list() {
     final MigrationInfoService result = flyway.info();

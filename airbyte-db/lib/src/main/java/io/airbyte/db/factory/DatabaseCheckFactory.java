@@ -104,7 +104,7 @@ public class DatabaseCheckFactory {
    * @return The configured {@link DatabaseInitializer} for the {@code Configurations} database.
    */
   public static DatabaseInitializer createConfigsDatabaseInitializer(final DSLContext dslContext, final long timeoutMs, final String initialSchema) {
-    return new ConfigsDatabaseInitializer(createConfigsDatabaseAvailabilityCheck(dslContext, timeoutMs), dslContext, initialSchema);
+    return new ConfigsDatabaseInitializer(createConfigsDatabaseAvailabilityCheck(dslContext, timeoutMs), dslContext, "");
   }
 
   /**
@@ -120,7 +120,7 @@ public class DatabaseCheckFactory {
    * @return The configured {@link DatabaseInitializer} for the {@code Jobs} database.
    */
   public static DatabaseInitializer createJobsDatabaseInitializer(final DSLContext dslContext, final long timeoutMs, final String initialSchema) {
-    return new JobsDatabaseInitializer(createJobsDatabaseAvailabilityCheck(dslContext, timeoutMs), dslContext, initialSchema);
+    return new JobsDatabaseInitializer(createJobsDatabaseAvailabilityCheck(dslContext, timeoutMs), dslContext, "");
   }
 
 }

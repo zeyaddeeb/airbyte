@@ -29,7 +29,7 @@ public class DevDatabaseMigrator implements DatabaseMigrator {
   private static final Logger LOGGER = LoggerFactory.getLogger(DevDatabaseMigrator.class);
 
   // A migrator that can run all migrations.
-  private final DatabaseMigrator fullMigrator;
+  private final FlywayDatabaseMigrator fullMigrator;
   // A migrator that will not run the last migration. It prepares the database to the state right
   // before the last migration.
   private final DatabaseMigrator baselineMigrator;
@@ -114,7 +114,11 @@ public class DevDatabaseMigrator implements DatabaseMigrator {
 
   @Override
   public BaselineResult createBaseline() {
-    fullMigrator.createBaseline();
+    // TODO We want to start from a baseline so we should not need to call createBaseline migration,
+    // instead we should be applying
+    // the migration for Jobs and Configs tables.
+    // fullMigrator.createBaseline();
+    fullMigrator.migrate("29_1_001");
     // Run all previous migration except for the last one to establish the baseline database state.
     baselineMigrator.migrate();
     return fullMigrator.createBaseline();
