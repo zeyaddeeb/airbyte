@@ -71,6 +71,15 @@ task buildStorybook(type: NpmTask) {
     outputs.dir 'build/storybook'
 }
 
+task publishStorybook(type: NpmTask) {
+    environment = [CHROMATIC_PROJECT_TOKEN: project.getProperty('chromaticProjectToken')]
+    args = ['run', 'publish:storybook']
+
+    inputs.files commonConfigs
+    inputs.dir '.storybook'
+    inputs.dir 'build/storybook'
+}
+
 task copyBuildOutput(type: Copy) {
     dependsOn copyDocker, npm_run_build
 

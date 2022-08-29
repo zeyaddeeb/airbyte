@@ -16,6 +16,7 @@
     "format": "prettier --write 'src/**/*.{ts,tsx}'",
     "storybook": "start-storybook -p 9009 --quiet",
     "build:storybook": "build-storybook -o 'build/storybook'",
+    "publish:storybook": "npx chromatic --storybook-build-dir=build/storybook",
     "lint": "eslint --ext js,ts,tsx src",
     "stylelint": "stylelint \"**/*.{css,scss}\"",
     "stylelint-check": "stylelint-config-prettier-scss-check",
