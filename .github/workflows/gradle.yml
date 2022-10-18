@@ -235,14 +235,15 @@ jobs:
       - name: Ensure no file change
         run: git --no-pager diff && test -z "$(git --no-pager diff)"
 
-      - name: Generate Test Report
-        uses: dorny/test-reporter@v1
+      - name: Publish Test Results
+        uses: cpdeethree/publish-unit-test-result-action/composite@v0.0.10
+        id: connectors-test-results
         if: always()
         with:
-          name: Connectors Base Test Report
-          # Specify top-level and second-level modules. Note there cannot be a space between the comma.
-          path: '/actions-runner/_work/airbyte/airbyte/*/build/test-results/*/*.xml,/actions-runner/_work/airbyte/airbyte/*/*/build/test-results/*/*.xml'
-          reporter: java-junit
+          junit_files: "/actions-runner/_work/airbyte/airbyte/*/build/test-results/*/*.xml\n/actions-runner/_work/airbyte/airbyte/*/*/build/test-results/*/*.xml"
+          comment_mode: off
+          json_file: connectors_base_results.json
+          check_name: "Connectors Test Results"
 
   # In case of self-hosted EC2 errors, remove this block.
   stop-connectors-base-build-runner:
@@ -522,14 +523,19 @@ jobs:
       - name: Automatic Migration Acceptance Test
         run: SUB_BUILD=PLATFORM ./gradlew :airbyte-tests:automaticMigrationAcceptanceTest --scan -i
 
-      - name: Generate Test Report
-        uses: dorny/test-reporter@v1
-        if: always()    # run this step even if previous step failed
+      - uses: actions/setup-python@v2
+        if: always()
         with:
-          name: Platform Test Report with Docker E2E Test
-          # Specify top-level and second-level modules. Note there cannot be a space between the comma.
-          path: '/actions-runner/_work/airbyte/airbyte/*/build/test-results/*/*.xml,/actions-runner/_work/airbyte/airbyte/*/*/build/test-results/*/*.xml'
-          reporter: java-junit
+          python-version: "3.9"
+
+      - name: Publish Test Results
+        uses: cpdeethree/publish-unit-test-result-action/composite@v0.0.10
+        if: always()
+        with:
+          junit_files: "/actions-runner/_work/airbyte/airbyte/*/build/test-results/*/*.xml\n/actions-runner/_work/airbyte/airbyte/*/*/build/test-results/*/*.xml"
+          comment_mode: off
+          json_file: platform_results.json
+          check_name: "Platform Test Results"
 
       - name: Upload test results to BuildPulse for flaky test detection
         if: '!cancelled()' # Run this step even when the tests fail. Skip if the workflow is cancelled.
@@ -541,15 +547,6 @@ jobs:
           key: ${{ secrets.BUILDPULSE_ACCESS_KEY_ID }}
           secret: ${{ secrets.BUILDPULSE_SECRET_ACCESS_KEY }}
           
-      - name: Upload test results to Github for analysis 
-        if: '!cancelled()' # Run this step even when the tests fail. Skip if the workflow is cancelled.
-        uses: actions/upload-artifact@v3
-        with:
-          path: |
-            /actions-runner/_work/airbyte/airbyte/*/build/test-results/*/*.xml
-            /actions-runner/_work/airbyte/airbyte/*/*/build/test-results/*/*.xml
-          name: test-results-build
-
   # In case of self-hosted EC2 errors, remove this block.
   stop-platform-build-runner:
     name: "Platform: Stop Build EC2 Runner"
@@ -681,13 +678,18 @@ jobs:
         run: |
           CI=true IS_MINIKUBE=true ./tools/bin/acceptance_test_kube.sh
 
-      - name: Generate Test Report
-        uses: dorny/test-reporter@v1
-        if: always()    # run this step even if previous step failed
+      - uses: actions/setup-python@v2
         with:
-          name: Platform Kubernetes E2E Test Report
-          path: '/actions-runner/_work/airbyte/airbyte/*/build/test-results/*/*.xml'
-          reporter: java-junit
+          python-version: "3.9"
+
+      - name: Publish Test Results
+        uses: cpdeethree/publish-unit-test-result-action/composite@v0.0.10
+        if: always()
+        with:
+          junit_files: "/actions-runner/_work/airbyte/airbyte/*/build/test-results/*/*.xml\n/actions-runner/_work/airbyte/airbyte/*/*/build/test-results/*/*.xml"
+          comment_mode: off
+          json_file: kube_results.json
+          check_name: "Kube Test Results"
 
       - name: Upload test results to BuildPulse for flaky test detection
         if: '!cancelled()' # Run this step even when the tests fail. Skip if the workflow is cancelled.
@@ -699,15 +701,6 @@ jobs:
           key: ${{ secrets.BUILDPULSE_ACCESS_KEY_ID }}
           secret: ${{ secrets.BUILDPULSE_SECRET_ACCESS_KEY }}
           
-      - name: Upload test results to Github for analysis 
-        if: '!cancelled()' # Run this step even when the tests fail. Skip if the workflow is cancelled.
-        uses: actions/upload-artifact@v3
-        with:
-          path: |
-            /actions-runner/_work/airbyte/airbyte/*/build/test-results/*/*.xml
-            /actions-runner/_work/airbyte/airbyte/*/*/build/test-results/*/*.xml
-          name: test-results-kube
-
       - uses: actions/upload-artifact@v2
         if: failure()
         with:
@@ -859,13 +852,16 @@ jobs:
 #          SECRET_STORE_GCP_PROJECT_ID: ${{ secrets.SECRET_STORE_GCP_PROJECT_ID }}
 #        run: |
 #          CI=true IS_MINIKUBE=true ./tools/bin/acceptance_test_kube_helm.sh
-#      - name: Generate Test Report
-#        uses: dorny/test-reporter@v1
-#        if: always()    # run this step even if previous step failed
+#
+#      - name: Publish Test Results
+#        uses: cpdeethree/publish-unit-test-result-action/composite@v0.0.10
+#        id: connectors-test-results
+#        if: always()
 #        with:
-#          name: Platform Helm E2E Test Report
-#          path: '/actions-runner/_work/airbyte/airbyte/*/build/test-results/*/*.xml'
-#          reporter: java-junit
+#          junit_files: "/actions-runner/_work/airbyte/airbyte/*/build/test-results/*/*.xml\n/actions-runner/_work/airbyte/airbyte/*/*/build/test-results/*/*.xml"
+#          comment_mode: off
+#          json_file: kube_acceptance_test.json
+#          check_name: "Connectors Test Results"
 #
 #      - uses: actions/upload-artifact@v2
 #        if: failure()
