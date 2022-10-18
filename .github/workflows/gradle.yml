@@ -236,7 +236,7 @@ jobs:
         run: git --no-pager diff && test -z "$(git --no-pager diff)"
 
       - name: Publish Test Results
-        uses: cpdeethree/publish-unit-test-result-action/composite@v0.0.10
+        uses: cpdeethree/publish-unit-test-result-action/composite@v0.0.11
         id: connectors-test-results
         if: always()
         with:
@@ -529,7 +529,7 @@ jobs:
           python-version: "3.9"
 
       - name: Publish Test Results
-        uses: cpdeethree/publish-unit-test-result-action/composite@v0.0.10
+        uses: cpdeethree/publish-unit-test-result-action/composite@v0.0.11
         if: always()
         with:
           junit_files: "/actions-runner/_work/airbyte/airbyte/*/build/test-results/*/*.xml\n/actions-runner/_work/airbyte/airbyte/*/*/build/test-results/*/*.xml"
@@ -683,7 +683,7 @@ jobs:
           python-version: "3.9"
 
       - name: Publish Test Results
-        uses: cpdeethree/publish-unit-test-result-action/composite@v0.0.10
+        uses: cpdeethree/publish-unit-test-result-action/composite@v0.0.11
         if: always()
         with:
           junit_files: "/actions-runner/_work/airbyte/airbyte/*/build/test-results/*/*.xml\n/actions-runner/_work/airbyte/airbyte/*/*/build/test-results/*/*.xml"
@@ -854,7 +854,7 @@ jobs:
 #          CI=true IS_MINIKUBE=true ./tools/bin/acceptance_test_kube_helm.sh
 #
 #      - name: Publish Test Results
-#        uses: cpdeethree/publish-unit-test-result-action/composite@v0.0.10
+#        uses: cpdeethree/publish-unit-test-result-action/composite@v0.0.11
 #        id: connectors-test-results
 #        if: always()
 #        with:
