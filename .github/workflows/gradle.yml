@@ -532,10 +532,18 @@ jobs:
         uses: cpdeethree/publish-unit-test-result-action/composite@v0.0.11
         if: always()
         with:
-          junit_files: "/actions-runner/_work/airbyte/airbyte/*/build/test-results/*/*.xml\n/actions-runner/_work/airbyte/airbyte/*/*/build/test-results/*/*.xml"
+          junit_files: "/actions-runner/_work/airbyte/airbyte/*/build/test-results/*/*.xml"
+          json_file: platform_results_1.json
+          check_name: "Platform Test Results (Main)"
+      
+      - name: Publish Test Results
+        uses: cpdeethree/publish-unit-test-result-action/composite@v0.0.13
+        if: always()
+        with:
+          junit_files: "/actions-runner/_work/airbyte/airbyte/*/*/build/test-results/*/*.xml"
           comment_mode: off
-          json_file: platform_results.json
-          check_name: "Platform Test Results"
+          json_file: platform_results_2.json
+          check_name: "Platform Test Results (Subprojects)"
 
       - name: Upload test results to BuildPulse for flaky test detection
         if: '!cancelled()' # Run this step even when the tests fail. Skip if the workflow is cancelled.
