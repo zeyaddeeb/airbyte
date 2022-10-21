@@ -300,7 +300,7 @@ def generate_products() -> list[Dict]:
     dirname = os.path.dirname(os.path.realpath(__file__))
     return read_json(os.path.join(dirname, "products.json"))
 
-def start_user_threads(object_pool: list, threads: list[threading.Thread], seed, parallelism=50):
+def start_user_threads(object_pool: list, threads: list[threading.Thread], seed, parallelism=10):
     global THREADS_ACTIVE
 
     THREADS_ACTIVE=True
