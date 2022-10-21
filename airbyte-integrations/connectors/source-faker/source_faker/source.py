@@ -6,6 +6,8 @@
 import datetime
 import json
 import os
+import threading
+import time
 import random
 from typing import Dict, Generator
 
@@ -109,9 +111,6 @@ class SourceFaker(Source):
         records_per_sync: int = config["records_per_sync"] if "records_per_sync" in config else 500
         records_per_slice: int = config["records_per_slice"] if "records_per_slice" in config else 100
 
-        person = Person(locale=Locale.EN, seed=seed)
-        dt = Datetime(seed=seed)
-
         to_generate_users = False
         to_generate_purchases = False
         purchases_stream = None
@@ -136,8 +135,16 @@ class SourceFaker(Source):
                 records_in_sync = 0
                 records_in_page = 0
 
+                users_buffer = []
+                users_thread_pool: list[threading.Thread] = []
+
+                def thread_proc():
+                    start_user_threads(users_buffer, users_thread_pool, seed)
+                thread_proc()
+
                 for i in range(cursor, count):
-                    user = generate_user(person, dt, i)
+                    user = wait_pop(users_buffer, thread_proc)
+                    user["id"] = i + 1
                     yield generate_record(stream, user)
                     total_records += 1
                     records_in_sync += 1
@@ -160,6 +167,8 @@ class SourceFaker(Source):
                 if purchases_stream is not None:
                     yield generate_state(state, purchases_stream, {"purchases_count": purchases_count})
 
+                stop_user_threads(users_thread_pool)
+
             elif stream.stream.name == "Products":
                 products = generate_products()
                 for p in products:
@@ -173,6 +182,25 @@ class SourceFaker(Source):
             else:
                 raise ValueError(stream.stream.name)
 
+
+def wait_pop(l: list, activator, max_tries=300, sleep=0.01, allow_retry=True):
+     # default is 3s of trying
+    result = None
+    attempt = 0
+    while result == None and attempt < max_tries:
+        attempt = attempt + 1
+        try:
+            result = l.pop()
+        except IndexError:
+            time.sleep(sleep)
+
+    if result==None and allow_retry:
+        activator()
+        return wait_pop(l, activator, max_tries, sleep, False)
+    if result==None and not allow_retry:
+        raise Exception(f"Could not get an element from pool in {sleep * max_tries}s")
+
+    return result
 
 def get_stream_cursor(state: Dict[str, any], stream: str) -> int:
     cursor = (state[stream]["cursor"] or 0) if stream in state else 0
@@ -211,12 +239,11 @@ def generate_state(state: Dict[str, any], stream: any, data: any):
     return AirbyteMessage(type=Type.STATE, state=AirbyteStateMessage(data=state))
 
 
-def generate_user(person: Person, dt: Datetime, user_id: int):
+def generate_user(person: Person, dt: Datetime):
     time_a = dt.datetime()
     time_b = dt.datetime()
 
     profile = {
-        "id": user_id + 1,
         "created_at": time_a if time_a <= time_b else time_b,
         "updated_at": time_a if time_a > time_b else time_b,
         "name": person.name(),
@@ -273,10 +300,36 @@ def generate_purchases(user: any, purchases_count: int) -> list[Dict]:
         i += 1
     return purchases
 
-
 def generate_products() -> list[Dict]:
     dirname = os.path.dirname(os.path.realpath(__file__))
     return read_json(os.path.join(dirname, "products.json"))
+
+def start_user_threads(object_pool: list, threads: list[threading.Thread], seed, parallelism=10):
+    i = 0
+    while (i < parallelism):
+        name = f"thread-{i + 1}"
+        print(f"Starting thread {name}")
+        t = threading.Thread(target=run_user_thread, name=name, args=(object_pool, seed))
+        t.start()
+        threads.append(t)
+        i = i + 1
+
+def stop_user_threads(threads: list[threading.Thread]):
+    while len(threads) > 0:
+        t = threads.pop()
+        print(f"Stopping thread {t.name}")
+        t.join()
+
+def run_user_thread(object_pool: list, seed: int, buffer_size=1000):
+    person = Person(locale=Locale.EN, seed=seed)
+    dt = Datetime(seed=seed)
+
+    while(len(object_pool) < buffer_size):
+        user = generate_user(person, dt)
+        object_pool.append(user)
+
+    print(f"Stopping thread {threading.current_thread().name} - buffer is full with {buffer_size} entries")
+    return len(object_pool)
 
 
 def read_json(filepath):
