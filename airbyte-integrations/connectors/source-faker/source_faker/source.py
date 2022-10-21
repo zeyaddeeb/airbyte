@@ -28,6 +28,8 @@ from airbyte_cdk.sources import Source
 from mimesis import Datetime, Person
 from mimesis.locales import Locale
 
+THREADS_ACTIVE =False
+
 class SourceFaker(Source):
     def check(self, logger: AirbyteLogger, config: Dict[str, any]) -> AirbyteConnectionStatus:
         """
@@ -137,8 +139,7 @@ class SourceFaker(Source):
                 users_buffer = []
                 users_thread_pool: list[threading.Thread] = []
 
-                THREADS_ACTIVE =False
-                start_user_threads(users_buffer, users_thread_pool, THREADS_ACTIVE, seed)
+                start_user_threads(users_buffer, users_thread_pool, seed)
 
                 for i in range(cursor, count):
                     user = wait_pop(users_buffer)
@@ -165,7 +166,7 @@ class SourceFaker(Source):
                 if purchases_stream is not None:
                     yield generate_state(state, purchases_stream, {"purchases_count": purchases_count})
 
-                stop_user_threads(users_thread_pool, THREADS_ACTIVE)
+                stop_user_threads(users_thread_pool)
 
             elif stream.stream.name == "Products":
                 products = generate_products()
@@ -299,25 +300,33 @@ def generate_products() -> list[Dict]:
     dirname = os.path.dirname(os.path.realpath(__file__))
     return read_json(os.path.join(dirname, "products.json"))
 
-def start_user_threads(object_pool: list, threads: list[threading.Thread], THREADS_ACTIVE:bool, seed, parallelism=10):
+def start_user_threads(object_pool: list, threads: list[threading.Thread], seed, parallelism=50):
+    global THREADS_ACTIVE
+
     THREADS_ACTIVE=True
     i = 0
     while (i < parallelism):
         name = f"thread-{i + 1}"
         print(f"Starting thread {name}")
-        t = threading.Thread(target=run_user_thread, name=name, args=(object_pool, THREADS_ACTIVE, seed))
+        t = threading.Thread(target=run_user_thread, name=name, args=(object_pool, seed))
         t.start()
         threads.append(t)
         i = i + 1
 
-def stop_user_threads(threads: list[threading.Thread], THREADS_ACTIVE):
+def stop_user_threads(threads: list[threading.Thread]):
+    global THREADS_ACTIVE
+
     THREADS_ACTIVE=False
+
     while len(threads) > 0:
         t = threads.pop()
         t.join()
 
-def run_user_thread(object_pool: list, THREADS_ACTIVE:bool, seed: int, buffer_size=1000):
+def run_user_thread(object_pool: list, seed: int, buffer_size=1000):
+    global THREADS_ACTIVE
     name =threading.current_thread().name
+    id=int(name.split("-")[1])
+
     if (THREADS_ACTIVE == False):
         print(f"Stopping thread {name}")
         return
@@ -329,10 +338,9 @@ def run_user_thread(object_pool: list, THREADS_ACTIVE:bool, seed: int, buffer_si
         user = generate_user(person, dt)
         object_pool.append(user)
 
-    print(f"[{name}] - buffer is full with {buffer_size} entries")
-    time.sleep(0.1)
+    time.sleep(0.1 * id)
 
-    run_user_thread(object_pool, THREADS_ACTIVE, seed, buffer_size)
+    run_user_thread(object_pool, seed, buffer_size)
 
 
 def read_json(filepath):
