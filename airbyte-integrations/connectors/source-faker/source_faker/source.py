@@ -28,7 +28,6 @@ from airbyte_cdk.sources import Source
 from mimesis import Datetime, Person
 from mimesis.locales import Locale
 
-
 class SourceFaker(Source):
     def check(self, logger: AirbyteLogger, config: Dict[str, any]) -> AirbyteConnectionStatus:
         """
@@ -138,12 +137,11 @@ class SourceFaker(Source):
                 users_buffer = []
                 users_thread_pool: list[threading.Thread] = []
 
-                def thread_proc():
-                    start_user_threads(users_buffer, users_thread_pool, seed)
-                thread_proc()
+                THREADS_ACTIVE =False
+                start_user_threads(users_buffer, users_thread_pool, THREADS_ACTIVE, seed)
 
                 for i in range(cursor, count):
-                    user = wait_pop(users_buffer, thread_proc)
+                    user = wait_pop(users_buffer)
                     user["id"] = i + 1
                     yield generate_record(stream, user)
                     total_records += 1
@@ -167,7 +165,7 @@ class SourceFaker(Source):
                 if purchases_stream is not None:
                     yield generate_state(state, purchases_stream, {"purchases_count": purchases_count})
 
-                stop_user_threads(users_thread_pool)
+                stop_user_threads(users_thread_pool, THREADS_ACTIVE)
 
             elif stream.stream.name == "Products":
                 products = generate_products()
@@ -183,7 +181,7 @@ class SourceFaker(Source):
                 raise ValueError(stream.stream.name)
 
 
-def wait_pop(l: list, activator, max_tries=300, sleep=0.01, allow_retry=True):
+def wait_pop(l: list, max_tries=300, sleep=0.01):
      # default is 3s of trying
     result = None
     attempt = 0
@@ -194,10 +192,7 @@ def wait_pop(l: list, activator, max_tries=300, sleep=0.01, allow_retry=True):
         except IndexError:
             time.sleep(sleep)
 
-    if result==None and allow_retry:
-        activator()
-        return wait_pop(l, activator, max_tries, sleep, False)
-    if result==None and not allow_retry:
+    if result==None:
         raise Exception(f"Could not get an element from pool in {sleep * max_tries}s")
 
     return result
@@ -304,23 +299,29 @@ def generate_products() -> list[Dict]:
     dirname = os.path.dirname(os.path.realpath(__file__))
     return read_json(os.path.join(dirname, "products.json"))
 
-def start_user_threads(object_pool: list, threads: list[threading.Thread], seed, parallelism=10):
+def start_user_threads(object_pool: list, threads: list[threading.Thread], THREADS_ACTIVE:bool, seed, parallelism=10):
+    THREADS_ACTIVE=True
     i = 0
     while (i < parallelism):
         name = f"thread-{i + 1}"
         print(f"Starting thread {name}")
-        t = threading.Thread(target=run_user_thread, name=name, args=(object_pool, seed))
+        t = threading.Thread(target=run_user_thread, name=name, args=(object_pool, THREADS_ACTIVE, seed))
         t.start()
         threads.append(t)
         i = i + 1
 
-def stop_user_threads(threads: list[threading.Thread]):
+def stop_user_threads(threads: list[threading.Thread], THREADS_ACTIVE):
+    THREADS_ACTIVE=False
     while len(threads) > 0:
         t = threads.pop()
-        print(f"Stopping thread {t.name}")
         t.join()
 
-def run_user_thread(object_pool: list, seed: int, buffer_size=1000):
+def run_user_thread(object_pool: list, THREADS_ACTIVE:bool, seed: int, buffer_size=1000):
+    name =threading.current_thread().name
+    if (THREADS_ACTIVE == False):
+        print(f"Stopping thread {name}")
+        return
+
     person = Person(locale=Locale.EN, seed=seed)
     dt = Datetime(seed=seed)
 
@@ -328,8 +329,10 @@ def run_user_thread(object_pool: list, seed: int, buffer_size=1000):
         user = generate_user(person, dt)
         object_pool.append(user)
 
-    print(f"Stopping thread {threading.current_thread().name} - buffer is full with {buffer_size} entries")
-    return len(object_pool)
+    print(f"[{name}] - buffer is full with {buffer_size} entries")
+    time.sleep(0.1)
+
+    run_user_thread(object_pool, THREADS_ACTIVE, seed, buffer_size)
 
 
 def read_json(filepath):
