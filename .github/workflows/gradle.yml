@@ -555,7 +555,6 @@ jobs:
           comment_mode: off
           json_file: platform_results_2.json
           check_name: "Platform Test Results (Subprojects)"
-            - name: install python packages
       
       - name: Install PyGithub
         run: |
