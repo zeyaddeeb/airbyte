@@ -245,6 +245,15 @@ jobs:
           json_file: connectors_base_results.json
           check_name: "Connectors Test Results"
 
+      - name: Generate Test Report
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Connectors Base Test Report
+          # Specify top-level and second-level modules. Note there cannot be a space between the comma.
+          path: '/actions-runner/_work/airbyte/airbyte/*/build/test-results/*/*.xml,/actions-runner/_work/airbyte/airbyte/*/*/build/test-results/*/*.xml'
+          reporter: java-junit
+
   # In case of self-hosted EC2 errors, remove this block.
   stop-connectors-base-build-runner:
     name: "Connectors Base: Stop Build EC2 Runner"
@@ -560,6 +569,14 @@ jobs:
           python tools/bin/upload_test_results_to_gh_api.py --platform_results_1.json
           python tools/bin/upload_test_results_to_gh_api.py --platform_results_2.json
       
+      - name: Generate Test Report
+        uses: dorny/test-reporter@v1
+        if: always()    # run this step even if previous step failed
+        with:
+          name: Platform Test Report with Docker E2E Test
+          # Specify top-level and second-level modules. Note there cannot be a space between the comma.
+          path: '/actions-runner/_work/airbyte/airbyte/*/build/test-results/*/*.xml,/actions-runner/_work/airbyte/airbyte/*/*/build/test-results/*/*.xml'
+          reporter: java-junit
 
       - name: Upload test results to BuildPulse for flaky test detection
         if: '!cancelled()' # Run this step even when the tests fail. Skip if the workflow is cancelled.
@@ -714,6 +731,14 @@ jobs:
           comment_mode: off
           json_file: kube_results.json
           check_name: "Kube Test Results"
+      
+      - name: Generate Test Report
+        uses: dorny/test-reporter@v1
+        if: always()    # run this step even if previous step failed
+        with:
+          name: Platform Kubernetes E2E Test Report
+          path: '/actions-runner/_work/airbyte/airbyte/*/build/test-results/*/*.xml'
+          reporter: java-junit
 
       - name: Upload test results to BuildPulse for flaky test detection
         if: '!cancelled()' # Run this step even when the tests fail. Skip if the workflow is cancelled.
