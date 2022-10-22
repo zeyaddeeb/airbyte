@@ -567,8 +567,8 @@ jobs:
         env: 
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python tools/bin/upload_test_results_to_gh_api.py --platform_results_1.json
-          python tools/bin/upload_test_results_to_gh_api.py --platform_results_2.json
+          python tools/bin/upload_test_results_to_gh_api.py --json platform_results_1.json
+          python tools/bin/upload_test_results_to_gh_api.py --json platform_results_2.json
       
       - name: Generate Test Report
         uses: dorny/test-reporter@v1
