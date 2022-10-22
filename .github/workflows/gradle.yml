@@ -543,6 +543,7 @@ jobs:
         if: always()
         with:
           junit_files: "/actions-runner/_work/airbyte/airbyte/*/build/test-results/*/*.xml"
+          comment_mode: off
           json_file: platform_results_1.json
           check_name: "Platform Test Results (Main)"
       

@@ -1,4 +1,6 @@
 import argparse
+import json
+import os
 from github import Github
 
 
@@ -9,6 +11,9 @@ test results from the output to the checks api "text" field for further analysis
 
 The script takes as input the filename of the json output by the aforementioned action, trims it, and uploads it to the "text" field
 of the check run provided in the json file.
+
+Note that there is a limit of ~65k characters in the check run API text field - so we do some trimming of the json to ensure that size
+is respected.
 
 '''
 
