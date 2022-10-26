@@ -545,6 +545,7 @@ jobs:
           junit_files: "/actions-runner/_work/airbyte/airbyte/*/build/test-results/*/*.xml"
           comment_mode: off
           json_file: platform_results_1.json
+          json_test_case_results: true
           check_name: "Platform Test Results (Main)"
       
       - name: Publish Test Results
@@ -555,6 +556,7 @@ jobs:
           junit_files: "/actions-runner/_work/airbyte/airbyte/*/*/build/test-results/*/*.xml"
           comment_mode: off
           json_file: platform_results_2.json
+          json_test_case_results: true
           check_name: "Platform Test Results (Subprojects)"
       
       - name: Install PyGithub
