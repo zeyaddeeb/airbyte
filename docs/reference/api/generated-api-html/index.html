@@ -6124,6 +6124,51 @@ containing the updated stream needs to be sent.</div>
       "logLines" : [ "logLines", "logLines" ]
     },
     "succeeded" : true
+  },
+  "catalogDiff" : {
+    "transforms" : [ {
+      "streamDescriptor" : {
+        "name" : "name",
+        "namespace" : "namespace"
+      },
+      "transformType" : "add_stream",
+      "updateStream" : [ {
+        "updateFieldSchema" : { },
+        "fieldName" : [ "fieldName", "fieldName" ],
+        "addField" : { },
+        "transformType" : "add_field",
+        "removeField" : { },
+        "breaking" : true
+      }, {
+        "updateFieldSchema" : { },
+        "fieldName" : [ "fieldName", "fieldName" ],
+        "addField" : { },
+        "transformType" : "add_field",
+        "removeField" : { },
+        "breaking" : true
+      } ]
+    }, {
+      "streamDescriptor" : {
+        "name" : "name",
+        "namespace" : "namespace"
+      },
+      "transformType" : "add_stream",
+      "updateStream" : [ {
+        "updateFieldSchema" : { },
+        "fieldName" : [ "fieldName", "fieldName" ],
+        "addField" : { },
+        "transformType" : "add_field",
+        "removeField" : { },
+        "breaking" : true
+      }, {
+        "updateFieldSchema" : { },
+        "fieldName" : [ "fieldName", "fieldName" ],
+        "addField" : { },
+        "transformType" : "add_field",
+        "removeField" : { },
+        "breaking" : true
+      } ]
+    } ]
   }
 }</code></pre>
 
@@ -6538,6 +6583,51 @@ containing the updated stream needs to be sent.</div>
       "logLines" : [ "logLines", "logLines" ]
     },
     "succeeded" : true
+  },
+  "catalogDiff" : {
+    "transforms" : [ {
+      "streamDescriptor" : {
+        "name" : "name",
+        "namespace" : "namespace"
+      },
+      "transformType" : "add_stream",
+      "updateStream" : [ {
+        "updateFieldSchema" : { },
+        "fieldName" : [ "fieldName", "fieldName" ],
+        "addField" : { },
+        "transformType" : "add_field",
+        "removeField" : { },
+        "breaking" : true
+      }, {
+        "updateFieldSchema" : { },
+        "fieldName" : [ "fieldName", "fieldName" ],
+        "addField" : { },
+        "transformType" : "add_field",
+        "removeField" : { },
+        "breaking" : true
+      } ]
+    }, {
+      "streamDescriptor" : {
+        "name" : "name",
+        "namespace" : "namespace"
+      },
+      "transformType" : "add_stream",
+      "updateStream" : [ {
+        "updateFieldSchema" : { },
+        "fieldName" : [ "fieldName", "fieldName" ],
+        "addField" : { },
+        "transformType" : "add_field",
+        "removeField" : { },
+        "breaking" : true
+      }, {
+        "updateFieldSchema" : { },
+        "fieldName" : [ "fieldName", "fieldName" ],
+        "addField" : { },
+        "transformType" : "add_field",
+        "removeField" : { },
+        "breaking" : true
+      } ]
+    } ]
   }
 }</code></pre>
 
@@ -10519,6 +10609,7 @@ containing the updated stream needs to be sent.</div>
 <div class="param">resourceRequirements (optional)</div><div class="param-desc"><span class="param-type"><a href="#ResourceRequirements">ResourceRequirements</a></span>  </div>
 <div class="param">sourceCatalogId (optional)</div><div class="param-desc"><span class="param-type"><a href="#UUID">UUID</a></span>  format: uuid</div>
 <div class="param">geography (optional)</div><div class="param-desc"><span class="param-type"><a href="#Geography">Geography</a></span>  </div>
+<div class="param">breakingChange (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -11396,6 +11487,7 @@ if oauth parameters were contained inside the top level, rootObject=[] If they w
       <div class="param">catalog (optional)</div><div class="param-desc"><span class="param-type"><a href="#AirbyteCatalog">AirbyteCatalog</a></span>  </div>
 <div class="param">jobInfo </div><div class="param-desc"><span class="param-type"><a href="#SynchronousJobRead">SynchronousJobRead</a></span>  </div>
 <div class="param">catalogId (optional)</div><div class="param-desc"><span class="param-type"><a href="#UUID">UUID</a></span>  format: uuid</div>
+<div class="param">catalogDiff (optional)</div><div class="param-desc"><span class="param-type"><a href="#CatalogDiff">CatalogDiff</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -11403,6 +11495,7 @@ if oauth parameters were contained inside the top level, rootObject=[] If they w
     <div class='model-description'></div>
     <div class="field-items">
       <div class="param">sourceId </div><div class="param-desc"><span class="param-type"><a href="#UUID">UUID</a></span>  format: uuid</div>
+<div class="param">connectionId (optional)</div><div class="param-desc"><span class="param-type"><a href="#UUID">UUID</a></span>  format: uuid</div>
 <div class="param">disable_cache (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span>  </div>
     </div>  <!-- field-items -->
   </div>

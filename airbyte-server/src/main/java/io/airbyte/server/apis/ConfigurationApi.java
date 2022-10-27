@@ -194,6 +194,12 @@ public class ConfigurationApi implements io.airbyte.api.generated.V1Api {
 
     final WorkspaceHelper workspaceHelper = new WorkspaceHelper(configRepository, jobPersistence);
 
+    connectionsHandler = new ConnectionsHandler(
+        configRepository,
+        workspaceHelper,
+        trackingClient,
+        eventRunner);
+
     schedulerHandler = new SchedulerHandler(
         configRepository,
         secretsRepositoryReader,
@@ -202,14 +208,9 @@ public class ConfigurationApi implements io.airbyte.api.generated.V1Api {
         jobPersistence,
         workerEnvironment,
         logConfigs,
-        eventRunner);
+        eventRunner, connectionsHandler);
 
     stateHandler = new StateHandler(statePersistence);
-    connectionsHandler = new ConnectionsHandler(
-        configRepository,
-        workspaceHelper,
-        trackingClient,
-        eventRunner);
     sourceHandler = new SourceHandler(
         configRepository,
         secretsRepositoryReader,
