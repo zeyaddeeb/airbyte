@@ -31,7 +31,19 @@ def main():
 
     f = open(args.json)
     d = json.load(f)
-    print(d)
+    out = {'success': {}, 'failure': {}, 'skipped': {}}
+    for elem in d['cases']:
+        if 'success' in elem['states']:
+            for i in range(len(elem['states']['success'])):
+                out['success'][elem['states']['success'][i]['test_name']]=elem['states']['success'][i]['time']
+        if 'failure' in elem['states']:
+            for i in range(len(elem['states']['failure'])):
+                out['failure'][elem['states']['success'][i]['test_name']]=elem['states']['failure'][i]['time']
+        if 'skipped' in elem['states']:
+            for i in range(len(elem['states']['skipped'])):
+                out['skipped'][elem['states']['skipped'][i]['test_name']]=elem['states']['skipped'][i]['time']
+
+    print(out)
 
 
 if __name__ == '__main__':
